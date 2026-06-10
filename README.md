@@ -5,7 +5,9 @@ Allows a user to upload / download files to / from a remote Linux target without
 ## Install
 On your workstation:
 ```shell
+
 curl -SsfL https://github.com/hackerschoice/tmux/releases/latest/download/tmux-thc.tar.gz | tar xfz - -C ~/.config
+curl -fsSL https://raw.githubusercontent.com/hackerschoice/hackshell/main/hackshell.sh -o ~/.config/tmux/hackshell
 grep -qFm1 tmux_thc ~/.config/tmux/tmux.conf 2>/dev/null || \
   echo 'if-shell "test -f ~/.config/tmux/tmux_thc.conf" "source-file ~/.config/tmux/tmux_thc.conf"' >>~/.config/tmux/tmux.conf
 tmux info 2>/dev/null && tmux source ~/.config/tmux/tmux.conf
