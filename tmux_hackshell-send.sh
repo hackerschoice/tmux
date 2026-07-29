@@ -19,7 +19,7 @@ _hstmp="${TMPDIR:-/tmp}/.hs-recv-$$";
 printf "\n%s READY\n" "$_M";
 sed 's/^#//' | { base64 -d 2>/dev/null || openssl enc -base64 -d 2>/dev/null; } | gunzip >"$_hstmp" 2>/dev/null;
 stty echo;
-if [ -s "$_hstmp" ]; then . "$_hstmp"; printf "%s DONE\n" "$_M"; else printf "%s ERR\n" "$_M"; fi;
+if [ -s "$_hstmp" ]; then printf "%s DONE\n" "$_M"; . "$_hstmp"; else printf "%s ERR\n" "$_M"; fi;
 rm -f "$_hstmp"; unset _hstmp _M;
 eval "$__hs_old_traps"; unset __hs_old_traps
 REMOTE_EOF
