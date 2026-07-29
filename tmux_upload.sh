@@ -48,6 +48,7 @@ _ulwatcher=$!;
 printf "\n__N__ READY\n";
 sed 's/^#//' | { base64 -d 2>/dev/null || openssl enc -base64 -d 2>/dev/null; } >"__B__";
 kill "$_ulwatcher" 2>/dev/null;
+wait "$_ulwatcher" 2>/dev/null;
 exec 2>&9 9>&-;
 _fe=$(( $(date +%s) - _s )); [ "$_fe" -le 0 ] && _fe=1;
 _fst=$(awk -v sent="__FSIZE__" -v secs="$_fe" -v total="__FSIZE__" 'BEGIN{

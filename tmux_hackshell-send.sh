@@ -62,7 +62,7 @@ j=0
 while [ "$j" -lt 200 ]; do
   l=$(tmux capture-pane -p -t "$p" -S -30 | grep -F "$n" | tail -1)
   case "$l" in
-    *"$n DONE"*) tmux display-message "Hackshell loaded"; exit 0 ;;
+    *"$n DONE"*) exit 0 ;;
     *"$n ERR"*) tmux display-message "Hackshell load failed (decode error)"; exit 2 ;;
   esac
   j=$((j+1))
