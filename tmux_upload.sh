@@ -12,7 +12,7 @@ b="$(basename "$f")"
 [ -n "$b" ] || b=upload
 n="__UL_READY_$(date +%s)$$__"
 fsize="$(wc -c <"$f" 2>/dev/null || echo 0)"
-tmux send-keys -t "$p" " stty -echo" C-m
+tmux send-keys -t "$p" " stty -echo; set +H 2>/dev/null" C-m
 sleep 0.1
 
 # Receiver runs on the remote: decodes stdin to $b, and in the background
@@ -22,7 +22,7 @@ sleep 0.1
 # itself - the client never needs to know the true transfer rate.
 rcv=$(cat <<'REMOTE_EOF'
 __ul_old_traps="$(trap)";
-trap "stty echo" EXIT INT TERM;
+trap "stty echo; set -H 2>/dev/null" EXIT INT TERM;
 exec 9>&2 2>/dev/null;
 _s=$(date +%s);
 ( while :; do
@@ -59,7 +59,7 @@ _fst=$(awk -v sent="__FSIZE__" -v secs="$_fe" -v total="__FSIZE__" 'BEGIN{
   printf "%3d%% %6.1f%s ETA 0:00:00", pct, v, u
 }');
 printf "\rUpload: %s   \n" "$_fst";
-stty echo;
+stty echo; set -H 2>/dev/null;
 printf "%s DONE\n" "__N__";
 eval "$__ul_old_traps"; unset __ul_old_traps
 REMOTE_EOF
@@ -74,7 +74,7 @@ while [ "$i" -lt 200 ]; do
   i=$((i+1))
   sleep 0.05
 done
-[ "$i" -ge 200 ] && { tmux send-keys -t "$p" C-c; tmux display-message "U handshake timeout"; exit 1; }
+[ "$i" -ge 200 ] && { tmux send-keys -t "$p" C-c; tmux send-keys -t "$p" " stty echo; set -H 2>/dev/null" C-m; tmux display-message "U handshake timeout"; exit 1; }
 
 shq() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 

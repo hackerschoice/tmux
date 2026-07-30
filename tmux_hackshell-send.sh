@@ -2,7 +2,7 @@
 p="$1"
 n="__HS_READY_$(date +%s)$$__"
 
-tmux send-keys -t "$p" " stty -echo" C-m
+tmux send-keys -t "$p" " stty -echo; set +H 2>/dev/null" C-m
 sleep 0.1
 
 # Receiver: decodes/gunzips stdin into a temp file, sources it (so functions/
@@ -13,12 +13,12 @@ sleep 0.1
 # the way a literal marker value could.
 rcv=$(cat <<'REMOTE_EOF'
 __hs_old_traps="$(trap)";
-trap "stty echo" EXIT INT TERM;
+trap "stty echo; set -H 2>/dev/null" EXIT INT TERM;
 _M="__N__";
 _hstmp="${TMPDIR:-/tmp}/.hs-recv-$$";
 printf "\n%s READY\n" "$_M";
 sed 's/^#//' | { base64 -d 2>/dev/null || openssl enc -base64 -d 2>/dev/null; } | gunzip >"$_hstmp" 2>/dev/null;
-stty echo;
+stty echo; set -H 2>/dev/null;
 if [ -s "$_hstmp" ]; then printf "%s DONE\n" "$_M"; . "$_hstmp"; else printf "%s ERR\n" "$_M"; fi;
 rm -f "$_hstmp"; unset _hstmp _M;
 eval "$__hs_old_traps"; unset __hs_old_traps
@@ -34,7 +34,7 @@ while [ "$i" -lt 200 ]; do
   i=$((i+1))
   sleep 0.05
 done
-[ "$i" -ge 200 ] && { tmux send-keys -t "$p" C-c; tmux send-keys -t "$p" " stty echo" C-m; tmux display-message "H handshake timeout"; exit 1; }
+[ "$i" -ge 200 ] && { tmux send-keys -t "$p" C-c; tmux send-keys -t "$p" " stty echo; set -H 2>/dev/null" C-m; tmux display-message "H handshake timeout"; exit 1; }
 
 # Prepare payload: strip comments, gzip, base64 (unchanged from before), then
 # fold to a safe line width and '#'-prefix each line so stray data landing on
@@ -69,6 +69,6 @@ while [ "$j" -lt 200 ]; do
   sleep 0.1
 done
 tmux send-keys -t "$p" C-c
-tmux send-keys -t "$p" " stty echo" C-m
+tmux send-keys -t "$p" " stty echo; set -H 2>/dev/null" C-m
 tmux display-message "Hackshell load timed out (stalled)"
 exit 3
