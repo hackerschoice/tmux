@@ -27,6 +27,7 @@ Start `tmux` on your workstation and use `ssh` or similiar RAT to connect to you
 | Ctrl-b R | Start / Stop recording current session to ~/tmux-rec-*.txt |
 | Ctrl-b S | Take screenshot of current session |
 
+(*this is a CAPITAL U/D/H/R/S, not u/d/h/r/s* 😘)
 
 ## How it works
 - It binds U/D/H/R/S keys in tmux.conf to specific functions.
