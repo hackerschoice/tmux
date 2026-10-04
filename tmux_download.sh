@@ -28,7 +28,7 @@ restore_win() {
   [ "$oar" = "1" ] && tmux set-window-option -t "$p" automatic-rename on
 }
 
-# Pre-query remote file size (bytes) for pv -s
+# Pre-query remote file size (bytes) for download progress
 sz_m="__DLSZ_$(date +%s)$$__"
 tmux send-keys -t "$p" " stty -echo; set +H 2>/dev/null" C-m
 sleep 0.1
@@ -43,10 +43,14 @@ while [ $i -lt 50 ]; do
   i=$((i+1)); sleep 0.1
 done
 [ "$fsize" = "ERR" ] && { restore_win; tmux display-message "Download ERR(2): file not readable: $r"; rm -f "$t" "$x" "$o" "$v"; exit 2; }
-# Compute expected bytes pv will see: b64 chars + one \r per 76-char line + overhead
+# Compute expected captured bytes: b64 chars + one \r per 76-char line + overhead
 expected=$(( (fsize + 2) / 3 * 4 + fsize / 57 + 200 ))
 
-tmux pipe-pane -t "$p" "stdbuf -o0 -e0 pv -f -r -e -s $expected 2>&1 >>\"$t\" | stdbuf -o0 tr -s '\\r' '\\n' | stdbuf -o0 grep -v '^$' >>\"$v\""
+if pv --help >/dev/null 2>&1 && command -v stdbuf >/dev/null 2>&1; then
+  tmux pipe-pane -t "$p" "stdbuf -o0 -e0 pv -f -r -e -s $expected 2>&1 >>\"$t\" | stdbuf -o0 tr -s '\\r' '\\n' | stdbuf -o0 grep -v '^$' >>\"$v\""
+else
+  tmux pipe-pane -t "$p" "exec cat >>\"$t\""
+fi
 # Speed summary is printed AFTER the END marker, not before - the local
 # script extracts everything between BEGIN/END as the payload to decode, so
 # anything printed before END would corrupt it. Same reasoning for the ANSI
@@ -91,7 +95,11 @@ while :; do
   s=$(wc -c <"$t" 2>/dev/null || echo 0)
   _stats=$(tail -1 "$v" 2>/dev/null | tr -d '\r')
   pct=$(( 100 * s / expected )); [ "$pct" -gt 100 ] && pct=100
-  [ -n "$_stats" ] && tmux rename-window -t "$p" "dl ${pct}% ${_stats}"
+  if [ -n "$_stats" ]; then
+    tmux rename-window -t "$p" "dl ${pct}% ${_stats}"
+  else
+    tmux rename-window -t "$p" "dl ${pct}%"
+  fi
   [ "$s" != "$sz" ] && { sz="$s"; idle=0; } || idle=$((idle+1))
   [ "$idle" -ge 15 ] && { restore_win; tmux display-message "Download ERR(3): stalled (no growth 15s)"; tmux pipe-pane -t "$p"; tmux send-keys -t "$p" C-c; tmux send-keys -t "$p" " stty echo; set -H 2>/dev/null; printf '\033[0m\033[?25h'" C-m; rm -f "$t" "$x" "$o" "$v"; exit 3; }
   sleep 1

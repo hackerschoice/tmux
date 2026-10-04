@@ -34,5 +34,5 @@ Start `tmux` on your workstation and use `ssh` or similiar RAT to connect to you
 - The functions use `tmux send-key` to inject a bash script into the remote system (memory only)
 - The bash-script then communicates via the existing PTY connection to the TMUX on your workstation
 - No new connection is established. The upload/download is binary save.
-- It requires 'pv' on your local workstation (for the progress bar).
 
+Downloads use `pv` to show transfer speed and ETA alongside percentage progress when `pv --help` succeeds and `stdbuf` is available. Otherwise, they use `cat` and show percentage progress only. Upload progress does not require `pv` or `stdbuf`.
