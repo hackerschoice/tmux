@@ -47,7 +47,7 @@ done
 expected=$(( (fsize + 2) / 3 * 4 + fsize / 57 + 200 ))
 
 if pv --help >/dev/null 2>&1 && command -v stdbuf >/dev/null 2>&1; then
-  tmux pipe-pane -t "$p" "stdbuf -o0 -e0 pv -f -r -e -s $expected 2>&1 >>\"$t\" | stdbuf -o0 tr -s '\\r' '\\n' | stdbuf -o0 grep -v '^$' >>\"$v\""
+  tmux pipe-pane -t "$p" "stdbuf -o0 -e0 pv -f -r -e -s $expected 2>&1 >\"$t\" | stdbuf -o0 tr -s '\\r' '\\n' | stdbuf -o0 grep -v '^$' >>\"$v\""
 else
   tmux pipe-pane -t "$p" "exec cat >>\"$t\""
 fi
