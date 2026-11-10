@@ -1,5 +1,36 @@
 #!/bin/sh
 p="$1"
+hs="$HOME/.config/tmux/hackshell.sh"
+
+if [ ! -e "$hs" ]; then
+  if ! command -v curl >/dev/null 2>&1; then
+    tmux display-message "Hackshell download needs curl"
+    exit 1
+  fi
+  if ! mkdir -p "${hs%/*}" || ! hs_tmp=$(mktemp "$hs.XXXXXX"); then
+    tmux display-message "Cannot prepare hackshell download"
+    exit 1
+  fi
+  trap 'rm -f "$hs_tmp"' 0
+  trap 'exit 1' HUP INT TERM
+  tmux display-message "Downloading hackshell.sh..."
+  if ! curl -fsSL --connect-timeout 15 --max-time 120 \
+    'https://github.com/hackerschoice/hackshell/raw/refs/heads/main/hackshell.sh' -o "$hs_tmp" || [ ! -s "$hs_tmp" ]; then
+    tmux display-message "Hackshell download failed"
+    exit 1
+  fi
+  if ! chmod 644 "$hs_tmp" || ! mv -f "$hs_tmp" "$hs"; then
+    tmux display-message "Cannot save hackshell.sh"
+    exit 1
+  fi
+  trap - 0 HUP INT TERM
+fi
+
+if [ ! -f "$hs" ] || [ ! -r "$hs" ] || [ ! -s "$hs" ]; then
+  tmux display-message "hackshell.sh is unreadable or empty"
+  exit 1
+fi
+
 n="__HS_READY_$(date +%s)$$__"
 
 tmux send-keys -t "$p" " stty -echo; set +H 2>/dev/null" C-m
@@ -42,7 +73,7 @@ done
 # same safety trick already used for uploads.
 _tmp="${TMPDIR:-/tmp}/.tmux-hs-$$"
 mkdir -p "$_tmp"
-grep -v '^#' "$HOME/.config/tmux/hackshell" | gzip | base64 | fold -w 800 | sed 's/^/#/' >"$_tmp/payload"
+grep -v '^#' "$hs" | gzip | base64 | fold -w 800 | sed 's/^/#/' >"$_tmp/payload"
 total=$(wc -c <"$_tmp/payload")
 offset=0
 while [ "$offset" -lt "$total" ]; do

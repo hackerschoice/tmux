@@ -7,7 +7,6 @@ On your workstation:
 ```shell
 
 curl -SsfL https://github.com/hackerschoice/tmux/releases/latest/download/tmux-thc.tar.gz | tar xfz - -C ~/.config
-curl -fsSL https://raw.githubusercontent.com/hackerschoice/hackshell/main/hackshell.sh -o ~/.config/tmux/hackshell
 grep -qFm1 tmux_thc ~/.config/tmux/tmux.conf 2>/dev/null || \
   echo 'if-shell "test -f ~/.config/tmux/tmux_thc.conf" "source-file ~/.config/tmux/tmux_thc.conf"' >>~/.config/tmux/tmux.conf
 tmux info 2>/dev/null && tmux source ~/.config/tmux/tmux.conf
@@ -24,8 +23,10 @@ Start `tmux` on your workstation and use `ssh` or similiar RAT to connect to you
 | Ctrl-b U | Upload a file |
 | Ctrl-b D | Download a file |
 | Ctrl-b H | Load hackshell |
-| Ctrl-b R | Start / Stop recording current session to ~/tmux-rec-*.txt |
+| Ctrl-b R | Start / Stop recording current session to ~/tmux-rec-\*.txt |
 | Ctrl-b S | Take screenshot of current session |
+| Ctrl-b o | Popup shell |
+| Ctrl-b m | Toggle mouse support |
 
 (*this is a CAPITAL U/D/H/R/S, not u/d/h/r/s* 😘)
 
