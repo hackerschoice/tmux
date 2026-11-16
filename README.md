@@ -10,7 +10,9 @@ curl -SsfL https://github.com/hackerschoice/tmux/releases/latest/download/tmux-t
 grep -qFm1 tmux_thc ~/.config/tmux/tmux.conf 2>/dev/null || \
   echo 'if-shell "test -f ~/.config/tmux/tmux_thc.conf" "source-file ~/.config/tmux/tmux_thc.conf"' >>~/.config/tmux/tmux.conf
 tmux info 2>/dev/null && tmux source ~/.config/tmux/tmux.conf
+# touch ~/.cool # ENABLE for Powerline status-line for iTerm2/WezTerm/Windows/kitty
 command -v pv >/dev/null || sudo apt install pv
+tmux source-file ~/.config/tmux/tmux.conf
 ```
 
 <img width="1081" height="476" alt="tmux-thc-upload" src="https://github.com/user-attachments/assets/5224828c-ff02-4976-90ce-3d64556ca4be" />
@@ -27,6 +29,7 @@ Start `tmux` on your workstation and use `ssh` or similiar RAT to connect to you
 | Ctrl-b S | Take screenshot of current session |
 | Ctrl-b o | Popup shell |
 | Ctrl-b m | Toggle mouse support |
+| Ctrl-b h | Help |
 
 (*this is a CAPITAL U/D/H/R/S, not u/d/h/r/s* 😘)
 
